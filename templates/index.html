@@ -9,6 +9,7 @@
     </style>
 </head>
 <body>
+    {% if not name_of_file %}
     <form
         action="{{url_for('upload_image')}}"
         method="post"
@@ -28,5 +29,25 @@
             <button type="submit">Extract Colors</button>
         </div>
     </form>
+    {% endif %}
+    {% if name_of_file: %}
+    <img src="uploaded_images/{{name_of_file}}" width="100%" alt="test image">
+
+    <table>
+        <thead>
+            <tr>
+                <th>Color</th>
+                <th>Color Code</th>
+            </tr>
+        </thead>
+        <tbody>
+            {%if colors:%}
+            {% for color in colors: %}
+		    <tr><td style="background-color:#{{color['hex_code']}}"></td><td>#{{color['hex_code']}}</td></tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+    {%endif%}
 </body>
 </html>

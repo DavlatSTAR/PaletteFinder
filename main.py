@@ -1,12 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime
+from PIL import Image
+from io import BytesIO
+from collections import Counter
 
 app = Flask(__name__)
 
 
 @app.route("/")
 def index_page():
-    return render_template("index.html")
+    return render_template("index.html", name_of_file=None, colors=None)
 
 
 @app.route("/upload", methods=["POST"])
@@ -16,7 +19,7 @@ def upload_image():
         json_data = {
             "image_bytes": request.files["imgFile"].read(),
             "name_of_file": request.files["imgFile"].filename,
-            "num_results": request.form.get("num_results"),
+            "num_results": int(request.form.get("num_results")),
             # "date_uploaded": str(datetime.now()).split(".")[0]
         }
         # Save images that was uploaded
@@ -24,11 +27,16 @@ def upload_image():
             f.write(json_data['image_bytes'])
 
         # Pass image data to process colors
-        process_image(json_data)
-        return redirect(url_for("index_page"))
+        colors = extract_colors(json_data)
+        return render_template("index.html", name_of_file=json_data["name_of_file"], colors=colors)
 
 
-def process_image(data: dict):
+def extract_colors(data: dict) -> list:
+    # Open the image from bytes
+    image = Image.open(BytesIO(data['image_bytes']))
+    print(image.getdata())
+    # Resize the image for faster processing
+    image = image.resize((150, 150))  # Reduce size for performance
     pass
 
 

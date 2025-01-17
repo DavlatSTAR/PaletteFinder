@@ -2,9 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Palette Finder</title>
+    <style>
+        /* Your existing styles here */
+    </style>
 </head>
 <body>
-
+    <form
+        action="{{url_for('upload_image')}}"
+        method="post"
+        enctype="multipart/form-data">
+        <fieldset>
+            <legend>Upload Image for Color Extraction</legend>
+            <div>
+                <label for="imgFile">Choose an Image:</label>
+                <input type="file" name="imgFile" id="imgFile" class="form-control" accept="image/*" required>
+            </div>
+            <div>
+                <label for="num_results">Number of Colors:</label>
+                <input type="number" name="num_results" id="num_results" value="10" class="form-control" min="1" max="100">
+            </div>
+        </fieldset>
+        <div>
+            <button type="submit">Extract Colors</button>
+        </div>
+    </form>
 </body>
 </html>

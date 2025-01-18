@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 from PIL import Image
 import numpy as np
 from sklearn.cluster import KMeans
@@ -17,10 +17,8 @@ def upload_image():
     if request.method == "POST":
         # Fetch the data from form
         json_data = {
-            "image_bytes": request.files["imgFile"].read(),
             "name_of_file": request.files["imgFile"].filename,
             "num_results": int(request.form.get("num_results")),
-            # "date_uploaded": str(datetime.now()).split(".")[0]
         }
         # Save images that was uploaded
         with open(f"static/uploaded_images/{json_data['name_of_file']}", "wb") as f:
@@ -36,7 +34,7 @@ def extract_colors(data: dict) -> list[tuple]:
     Extracts the most dominant colors from an image using k-means clustering.
 
     Args:
-        data (dict): A dictionary containing the image file name (name_of_file).
+        data (dict): A dictionary containing the image file name (name_of_file) and num_of_resutls.
 
     Returns:
         list[tuple]: A list of the dominant colors, where each color

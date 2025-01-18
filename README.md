@@ -25,8 +25,8 @@ This is a web application built with Flask that allows users to upload an image 
    ```bash
   git clone https://github.com/DavlatSTAR/PaletteFinder.git
   ```
-3.  **In Terminal run:**
+2.  **In Terminal run:**
    ```powershell
    pip install -r requrements.txt
    ```
-5. **Run main.py**
+3. **Run main.py**

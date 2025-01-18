@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
-from datetime import datetime
 from PIL import Image
-from io import BytesIO
+import numpy as np
+from sklearn.cluster import KMeans
 from collections import Counter
 
 app = Flask(__name__)
@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index_page():
-    return render_template("index.html", name_of_file=None, colors=None)
+    return render_template("index.html", name_of_file=None, colors=None, num_of_results=None)
 
 
 @app.route("/upload", methods=["POST"])
@@ -23,21 +23,45 @@ def upload_image():
             # "date_uploaded": str(datetime.now()).split(".")[0]
         }
         # Save images that was uploaded
-        with open(f"uploaded_images/{json_data['name_of_file']}", "wb") as f:
+        with open(f"static/uploaded_images/{json_data['name_of_file']}", "wb") as f:
             f.write(json_data['image_bytes'])
 
         # Pass image data to process colors
         colors = extract_colors(json_data)
-        return render_template("index.html", name_of_file=json_data["name_of_file"], colors=colors)
+        return render_template("index.html", name_of_file=json_data["name_of_file"], colors=colors, num_of_results=json_data['num_results'])
 
 
-def extract_colors(data: dict) -> list:
+def extract_colors(data: dict) -> list[tuple]:
+    """
+    Extracts the most dominant colors from an image using k-means clustering.
+
+    Args:
+        data (dict): A dictionary containing the image file name (name_of_file).
+
+    Returns:
+        list[tuple]: A list of the dominant colors, where each color
+        is a tuple of (Red, Green, Blue) integer values.
+    """
     # Open the image from bytes
-    image = Image.open(BytesIO(data['image_bytes']))
-    print(image.getdata())
-    # Resize the image for faster processing
-    image = image.resize((150, 150))  # Reduce size for performance
-    pass
+    image = Image.open(f"static/uploaded_images/{data['name_of_file']}")
+    image = image.convert('RGB')
+    image_array = np.array(image)
+
+    # Reshape the image into a 2D array of RGB values
+    pixels = image_array.reshape(-1, 3)
+
+    kmeans = KMeans(n_clusters=data.get('num_results', 10), random_state=42, n_init='auto')
+    kmeans.fit(pixels)
+
+    # Get the cluster centers (dominant colors) and their counts
+    dominant_colors = kmeans.cluster_centers_.astype(int)
+    counts = Counter(kmeans.labels_)
+
+    # Sort colors by frequency
+    sorted_colors = sorted(counts.items(), key=lambda x: x[1], reverse=True)
+    top_colors = [tuple(dominant_colors[idx]) for idx, _ in sorted_colors]
+
+    return top_colors
 
 
 if __name__ == "__main__":
